@@ -1,0 +1,34 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /var/www
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/var/www
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: katon_worklog
+      MYSQL_USER: katon
+      MYSQL_PASSWORD: katon_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - katon_worklog_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  katon_worklog_mysql_data:
